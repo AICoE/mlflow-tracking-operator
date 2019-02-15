@@ -7,8 +7,8 @@ import (
 	"os"
 	"runtime"
 
-	"github.com/example-inc/mlflow-tracking-operator/pkg/apis"
-	"github.com/example-inc/mlflow-tracking-operator/pkg/controller"
+	"github.com/zmhassan/mlflow-tracking-operator/pkg/apis"
+	"github.com/zmhassan/mlflow-tracking-operator/pkg/controller"
 
 	"github.com/operator-framework/operator-sdk/pkg/k8sutil"
 	"github.com/operator-framework/operator-sdk/pkg/leader"

@@ -53,7 +53,7 @@ const (
 )
 
 // MustInProjectRoot checks if the current dir is the project root and returns the current repo's import path
-// e.g github.com/example-inc/app-operator
+// e.g github.com/zmhassan/app-operator
 func MustInProjectRoot() {
 	// if the current directory has the "./build/dockerfile" file, then it is safe to say
 	// we are at the project root.
@@ -85,7 +85,7 @@ func MustGetwd() string {
 }
 
 // CheckAndGetProjectGoPkg checks if this project's repository path is rooted under $GOPATH and returns the current directory's import path
-// e.g: "github.com/example-inc/app-operator"
+// e.g: "github.com/zmhassan/app-operator"
 func CheckAndGetProjectGoPkg() string {
 	gopath := MustSetGopath(MustGetGopath())
 	goSrc := filepath.Join(gopath, SrcDir)

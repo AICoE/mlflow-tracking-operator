@@ -1,0 +1,7 @@
+apiVersion: ai.mlflow.org/v1alpha1
+kind: TrackingServer
+metadata:
+  name: example2-trackingserver
+spec:
+  # Add fields here
+  size: 1
