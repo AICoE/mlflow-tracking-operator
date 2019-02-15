@@ -62,6 +62,14 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		return err
 	}
 
+	err = c.Watch(&source.Kind{Type: &corev1.Service{}}, &handler.EnqueueRequestForOwner{
+		IsController: true,
+		OwnerType:    &aiv1alpha1.TrackingServer{},
+	})
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -102,9 +110,14 @@ func (r *ReconcileTrackingServer) Reconcile(request reconcile.Request) (reconcil
 
 	// Define a new Pod object
 	pod := newPodForCR(instance)
+	srv := newServiceForMLFlow(instance)
 
 	// Set TrackingServer instance as the owner and controller
 	if err := controllerutil.SetControllerReference(instance, pod, r.scheme); err != nil {
+		return reconcile.Result{}, err
+	}
+
+	if err := controllerutil.SetControllerReference(instance, srv, r.scheme); err != nil {
 		return reconcile.Result{}, err
 	}
 
@@ -113,11 +126,16 @@ func (r *ReconcileTrackingServer) Reconcile(request reconcile.Request) (reconcil
 	err = r.client.Get(context.TODO(), types.NamespacedName{Name: pod.Name, Namespace: pod.Namespace}, found)
 	if err != nil && errors.IsNotFound(err) {
 		reqLogger.Info("Creating a new Pod", "Pod.Namespace", pod.Namespace, "Pod.Name", pod.Name)
+
 		err = r.client.Create(context.TODO(), pod)
 		if err != nil {
 			return reconcile.Result{}, err
 		}
-
+		// Creating a service to map to service
+		err2 := r.client.Create(context.TODO(), srv)
+		if err2 != nil {
+			return reconcile.Result{}, err2
+		}
 		// Pod created successfully - don't requeue
 		return reconcile.Result{}, nil
 	} else if err != nil {
@@ -127,6 +145,32 @@ func (r *ReconcileTrackingServer) Reconcile(request reconcile.Request) (reconcil
 	// Pod already exists - don't requeue
 	reqLogger.Info("Skip reconcile: Pod already exists", "Pod.Namespace", found.Namespace, "Pod.Name", found.Name)
 	return reconcile.Result{}, nil
+}
+
+func newServiceForMLFlow(cr *aiv1alpha1.TrackingServer) *corev1.Service  {
+	service := &corev1.Service{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: "mlflow-server-svc",
+			Namespace: cr.Namespace,
+			Labels: map[string]string{
+				"app": cr.Name+"-svc",
+				"type": "service",
+			},
+			OwnerReferences: []metav1.OwnerReference{},
+		},
+		Spec: corev1.ServiceSpec{
+			Type:      "ClusterIP",
+			ClusterIP: "None",
+			Selector: map[string]string{
+				"app": cr.Name,
+			},
+			Ports: []corev1.ServicePort{{
+				Name: "http",
+				Port: 5000,
+			}},
+		},
+	}
+	return service
 }
 
 // newPodForCR returns a busybox pod with the same name/namespace as the cr
@@ -144,7 +188,7 @@ func newPodForCR(cr *aiv1alpha1.TrackingServer) *corev1.Pod {
 			Containers: []corev1.Container{
 				{
 					Name:    "trackingservice",
-					Image:   "quay.io/zmhassan/mlflow:0.5.0-rc13",
+					Image:   cr.Spec.Image,
 					Ports: []corev1.ContainerPort{
 						{
 							Name:          "trackingserver",
