@@ -40,6 +40,10 @@ this later on in this document). In case you need to upgrade or want
 to install your own instance of tracking then the following command
 should allow for you to install mlflow tracking server in your namespace:
 
+Note: If your using minishift or minikube you must have cluster-admin priviledges to 
+install `ai_v1alpha1_trackingserver_crd.yaml`
+
+
 ```bash
 # Setup Service Account
 $ kubectl create -f deploy/service_account.yaml
@@ -186,7 +190,7 @@ Choose one of the following options:
  
 You can store your models in S3 aws or Ceph Storage with S3 endpoint if you have `MLFLOW_S3_ENDPOINT_URL` set
 
- You will need to be running 0.8.2 of mlflow server with the following environment variables set:
+ You will need to be running `0.8.2` of mlflow server with the following environment variables set:
 
 Optional only if your running Ceph or Minio:
  * `MLFLOW_S3_ENDPOINT_URL='http://0.0.0.0:9090'`
@@ -197,4 +201,20 @@ Required:
  * `AWS_ACCESS_KEY_ID=?????????????`
  * `AWS_SECRET_ACCESS_KEY=?????????????`
  
+ For Example you can use the following custom resource sample file to create MLFlow Tracking 
+ Server that stores models to S3:
  
+ ```yaml
+ 
+ apiVersion: ai.mlflow.org/v1alpha1
+ kind: TrackingServer
+ metadata:
+   name: zak-tracking-server
+ spec:
+   # Add fields here
+   size: 2
+   Image: "quay.io/zmhassan/mlflow:0.8.2"
+   AWS_SECRET_NAME: "ceph-s3-secret"
+   S3_ENDPOINT_URL: "http://0.0.0.0:9090"
+   
+ ```
