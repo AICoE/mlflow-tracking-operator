@@ -180,14 +180,21 @@ Choose one of the following options:
   
   ````
  
+ ## Storing Models in S3 with MLFlow
  
-
-## Additional Repos 
+ When training your model in addition to the hyper parameters you can also version your model.
  
+You can store your models in S3 aws or Ceph Storage with S3 endpoint if you have `MLFLOW_S3_ENDPOINT_URL` set
 
-To find the docker images source and example notebooks you can visit
-gitlab at the following link.
-[*https://github.com/AICoE/experiment-tracking.git*](https://github.com/AICoE/experiment-tracking.git)
+ You will need to be running 0.8.2 of mlflow server with the following environment variables set:
 
-See ‘**examples**’ folder for sample notebook which does training on
-wine dataset.
+Optional only if your running Ceph or Minio:
+ * `MLFLOW_S3_ENDPOINT_URL='http://0.0.0.0:9090'`
+
+Required:
+
+ * `MLFLOW_EXTRA_OPS='--default-artifact-root s3://BUCKET_NAME/'` 
+ * `AWS_ACCESS_KEY_ID=?????????????`
+ * `AWS_SECRET_ACCESS_KEY=?????????????`
+ 
+ 
