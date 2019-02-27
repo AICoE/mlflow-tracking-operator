@@ -5,4 +5,4 @@ metadata:
 spec:
   # Add fields here
   size: 2
-  Image: "quay.io/zmhassan/mlflow:0.7.0"
+  Image: "quay.io/zmhassan/mlflow:0.8.2"

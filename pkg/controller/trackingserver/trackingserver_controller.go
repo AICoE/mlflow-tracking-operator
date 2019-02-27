@@ -179,6 +179,29 @@ func  newDeploymentForMLFlow(cr *aiv1alpha1.TrackingServer) *v1.Deployment{
 	labels := map[string]string{
 		"app": cr.Name,
 	}
+	con:=[]corev1.Container{{
+		Image:   cr.Spec.Image,
+		Name:    cr.Name,
+		Ports: []corev1.ContainerPort{{
+			ContainerPort: 5000,
+			Name:          "trackingserver",
+		}},
+	}}
+
+	if len(cr.Spec.AWS_SECRET_NAME) != 0{
+		con[0].EnvFrom= [] corev1.EnvFromSource{{
+			SecretRef:&corev1.SecretEnvSource{ LocalObjectReference: corev1.LocalObjectReference{ Name: cr.Spec.AWS_SECRET_NAME}},
+		}}
+	}
+
+	if len(cr.Spec.S3_ENDPOINT_URL) != 0{
+		con[0].Env=[]corev1.EnvVar{{
+			Name: "MLFLOW_S3_ENDPOINT_URL",
+			Value: cr.Spec.S3_ENDPOINT_URL,
+		}}
+	}
+
+
 	dep:= &v1.Deployment{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: "apps/v1",
@@ -198,14 +221,7 @@ func  newDeploymentForMLFlow(cr *aiv1alpha1.TrackingServer) *v1.Deployment{
 					Labels: labels,
 				},
 				Spec: corev1.PodSpec{
-					Containers: []corev1.Container{{
-						Image:   cr.Spec.Image,
-						Name:    cr.Name,
-						Ports: []corev1.ContainerPort{{
-							ContainerPort: 5000,
-							Name:          "trackingserver",
-						}},
-					}},
+					Containers: con,
 				},
 			},
 		},
