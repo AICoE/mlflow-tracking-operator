@@ -2,6 +2,7 @@ package trackingserver
 
 import (
 	"context"
+	"k8s.io/api/apps/v1"
 
 	aiv1alpha1 "github.com/zmhassan/mlflow-tracking-operator/pkg/apis/ai/v1alpha1"
 
@@ -108,12 +109,12 @@ func (r *ReconcileTrackingServer) Reconcile(request reconcile.Request) (reconcil
 		return reconcile.Result{}, err
 	}
 
-	// Define a new Pod object
-	pod := newPodForCR(instance)
+	// Define a new Deployment object
+	var deployment = newDeploymentForMLFlow(instance)
 	srv := newServiceForMLFlow(instance)
 
 	// Set TrackingServer instance as the owner and controller
-	if err := controllerutil.SetControllerReference(instance, pod, r.scheme); err != nil {
+	if err := controllerutil.SetControllerReference(instance, deployment, r.scheme); err != nil {
 		return reconcile.Result{}, err
 	}
 
@@ -121,13 +122,13 @@ func (r *ReconcileTrackingServer) Reconcile(request reconcile.Request) (reconcil
 		return reconcile.Result{}, err
 	}
 
-	// Check if this Pod already exists
-	found := &corev1.Pod{}
-	err = r.client.Get(context.TODO(), types.NamespacedName{Name: pod.Name, Namespace: pod.Namespace}, found)
+	// Check if this Deployment already exists
+	found := &v1.Deployment{}
+	err = r.client.Get(context.TODO(), types.NamespacedName{Name: deployment.Name, Namespace: deployment.Namespace}, found)
 	if err != nil && errors.IsNotFound(err) {
-		reqLogger.Info("Creating a new Pod", "Pod.Namespace", pod.Namespace, "Pod.Name", pod.Name)
+		reqLogger.Info("Creating a new Deployment", "Deployment.Namespace", deployment.Namespace, "Deployment.Name", deployment.Name)
 
-		err = r.client.Create(context.TODO(), pod)
+		err = r.client.Create(context.TODO(), deployment)
 		if err != nil {
 			return reconcile.Result{}, err
 		}
@@ -136,21 +137,21 @@ func (r *ReconcileTrackingServer) Reconcile(request reconcile.Request) (reconcil
 		if err2 != nil {
 			return reconcile.Result{}, err2
 		}
-		// Pod created successfully - don't requeue
+		// Deployment created successfully - don't requeue
 		return reconcile.Result{}, nil
 	} else if err != nil {
 		return reconcile.Result{}, err
 	}
 
-	// Pod already exists - don't requeue
-	reqLogger.Info("Skip reconcile: Pod already exists", "Pod.Namespace", found.Namespace, "Pod.Name", found.Name)
+	// Deployment already exists - don't requeue
+	reqLogger.Info("Skip reconcile: Deployment already exists", "Deployment.Namespace", found.Namespace, "Deployment.Name", found.Name)
 	return reconcile.Result{}, nil
 }
 
 func newServiceForMLFlow(cr *aiv1alpha1.TrackingServer) *corev1.Service  {
 	service := &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: "mlflow-server-svc",
+			Name: cr.Name+"-svc",
 			Namespace: cr.Namespace,
 			Labels: map[string]string{
 				"app": cr.Name+"-svc",
@@ -173,31 +174,44 @@ func newServiceForMLFlow(cr *aiv1alpha1.TrackingServer) *corev1.Service  {
 	return service
 }
 
-// newPodForCR returns a busybox pod with the same name/namespace as the cr
-func newPodForCR(cr *aiv1alpha1.TrackingServer) *corev1.Pod {
+func  newDeploymentForMLFlow(cr *aiv1alpha1.TrackingServer) *v1.Deployment{
+	replicas := cr.Spec.Size
 	labels := map[string]string{
 		"app": cr.Name,
 	}
-	return &corev1.Pod{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      cr.Name + "-pod",
-			Namespace: cr.Namespace,
-			Labels:    labels,
+	dep:= &v1.Deployment{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: "apps/v1",
+			Kind:       "Deployment",
 		},
-		Spec: corev1.PodSpec{
-			Containers: []corev1.Container{
-				{
-					Name:    "trackingservice",
-					Image:   cr.Spec.Image,
-					Ports: []corev1.ContainerPort{
-						{
-							Name:          "trackingserver",
-							Protocol:      corev1.ProtocolTCP,
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      cr.Name,
+			Namespace: cr.Namespace,
+		},
+		Spec: v1.DeploymentSpec{
+			Replicas: &replicas,
+			Selector: &metav1.LabelSelector{
+				MatchLabels: labels,
+			},
+			Template: corev1.PodTemplateSpec{
+				ObjectMeta: metav1.ObjectMeta{
+					Labels: labels,
+				},
+				Spec: corev1.PodSpec{
+					Containers: []corev1.Container{{
+						Image:   cr.Spec.Image,
+						Name:    cr.Name,
+						Ports: []corev1.ContainerPort{{
 							ContainerPort: 5000,
-						},
-					},
+							Name:          "trackingserver",
+						}},
+					}},
 				},
 			},
 		},
 	}
+
+	return dep
+
 }
+

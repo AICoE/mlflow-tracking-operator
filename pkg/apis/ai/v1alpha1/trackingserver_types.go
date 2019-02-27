@@ -13,7 +13,10 @@ type TrackingServerSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "operator-sdk generate k8s" to regenerate code after modifying this file
 	// Add custom validation using kubebuilder tags: https://book.kubebuilder.io/beyond_basics/generating_crd.html
+	Size int32 `json:"size"`
 	Image string `json"image"`
+	S3_ENDPOINT_URL string `json"s3_endpoint_url"`
+	AWS_SECRET_NAME string `json"aws_cred_secret"`
 }
 
 // TrackingServerStatus defines the observed state of TrackingServer
