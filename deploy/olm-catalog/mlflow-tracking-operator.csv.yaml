@@ -30,6 +30,35 @@ spec:
       version: v1alpha1
       description: MLFlow Tracking Server for experiment tracking of machine learning jobs
       displayName: OpenDatahub - Mlflow Tracking Operator
+      resources:
+        - kind: Pod
+          version: v1
+        - kind: Service
+          version: v1
+        - kind: Deployment
+          version: v1
+        specDescriptors:
+          - description: Aws Secret Credentials for MLFlow
+              displayName: AWS_CRED_SECRET
+              path: aws_cred_secret
+              x-descriptors:
+                - 'urn:alm:descriptor:io.kubernetes:core:v1:Secret'
+          - description: S3 Endpoint option
+              displayName: S3_ENDPOINT_URL
+              path: s3_endpoint_url
+              x-descriptors:
+                - 'urn:alm:descriptor:com.tectonic.ui:text'
+          - description: MLFlow Image Version
+              displayName: Image
+              path: image
+              x-descriptors:
+                - 'urn:alm:descriptor:com.tectonic.ui:text'
+          - description: Cluster Size
+              displayName: Size
+              path: size
+              x-descriptors:
+                - 'urn:alm:descriptor:com.tectonic.ui:label'
+
 
   description: MLFlow Tracking Server for experiment tracking of machine learning jobs
   displayName: OpenDatahub - Mlflow Tracking Operator
