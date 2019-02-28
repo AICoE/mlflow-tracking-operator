@@ -2,8 +2,25 @@ apiVersion: operators.coreos.com/v1alpha1
 kind: ClusterServiceVersion
 metadata:
   creationTimestamp: null
-  name: mlflow-tracking-operator.v0.0.1
-  namespace: placeholder
+  name: mlflow-tracking-operator.v0.1.0
+  namespace: mlflow-olm
+  annotations:
+    categories: "MLFlow - Model Lifecycle Management"
+    certified: "false"
+    containerImage: quay.io/zmhassan/mlflow-tracking-operator
+    capabilities: Seamless Upgrades
+    support: Mlflow
+    description: Provides hyperparameter tooling and model lifecycle management for machine learning jobs
+    alm-examples: |-
+      apiVersion: ai.mlflow.org/v1alpha1
+      kind: TrackingServer
+      metadata:
+        name: zak-tracking-server
+      spec:
+        # Add fields here
+        size: 2
+        Image: "quay.io/zmhassan/mlflow:0.8.2"
+
 spec:
   apiservicedefinitions: {}
   customresourcedefinitions:
@@ -11,8 +28,27 @@ spec:
     - kind: TrackingServer
       name: trackingservers.ai.mlflow.org
       version: v1alpha1
-  description: Placeholder description
-  displayName: Mlflow Tracking Operator
+      description: MLFlow Tracking Server for experiment tracking of machine learning jobs
+      displayName: OpenDatahub - Mlflow Tracking Operator
+
+  description: MLFlow Tracking Server for experiment tracking of machine learning jobs
+  displayName: OpenDatahub - Mlflow Tracking Operator
+  keywords: ['mlflow', 'hyperparameter-tuning', 'machine-learning']
+  maintainers:
+    - name: Zak Hassan
+      email: zak.hassan@redhat.com
+  links:
+    - name: MLFlow Source Code
+      url: https://github.com/zmhassan/mlflow-tracking-operator
+  installModes:
+    - type: OwnNamespace
+      supported: true
+    - type: SingleNamespace
+      supported: true
+    - type: MultiNamespace
+      supported: false
+    - type: AllNamespaces
+      supported: true
   install:
     spec:
       deployments:
@@ -93,5 +129,11 @@ spec:
         serviceAccountName: mlflow-tracking-operator
     strategy: deployment
   maturity: alpha
-  provider: {}
-  version: 0.0.1
+  provider:
+    name: Mlflow
+  labels:
+    name: mlflow-tracking-operator
+  selector:
+    matchLabels:
+      name: mlflow-tracking-operator
+  version: 0.1.0
