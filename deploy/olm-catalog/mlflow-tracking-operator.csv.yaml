@@ -1,0 +1,97 @@
+apiVersion: operators.coreos.com/v1alpha1
+kind: ClusterServiceVersion
+metadata:
+  creationTimestamp: null
+  name: mlflow-tracking-operator.v0.0.1
+  namespace: placeholder
+spec:
+  apiservicedefinitions: {}
+  customresourcedefinitions:
+    owned:
+    - kind: TrackingServer
+      name: trackingservers.ai.mlflow.org
+      version: v1alpha1
+  description: Placeholder description
+  displayName: Mlflow Tracking Operator
+  install:
+    spec:
+      deployments:
+      - name: mlflow-tracking-operator
+        spec:
+          replicas: 1
+          selector:
+            matchLabels:
+              name: mlflow-tracking-operator
+          strategy: {}
+          template:
+            metadata:
+              creationTimestamp: null
+              labels:
+                name: mlflow-tracking-operator
+            spec:
+              containers:
+              - command:
+                - mlflow-tracking-operator
+                env:
+                - name: WATCH_NAMESPACE
+                  valueFrom:
+                    fieldRef:
+                      fieldPath: metadata.namespace
+                - name: POD_NAME
+                  valueFrom:
+                    fieldRef:
+                      fieldPath: metadata.name
+                - name: OPERATOR_NAME
+                  value: mlflow-tracking-operator
+                image: quay.io/zmhassan/mlflow-tracking-operator
+                imagePullPolicy: Always
+                name: mlflow-tracking-operator
+                resources: {}
+              serviceAccountName: mlflow-tracking-operator
+      permissions:
+      - rules:
+        - apiGroups:
+          - ""
+          resources:
+          - pods
+          - services
+          - endpoints
+          - persistentvolumeclaims
+          - events
+          - configmaps
+          - secrets
+          verbs:
+          - '*'
+        - apiGroups:
+          - ""
+          resources:
+          - namespaces
+          verbs:
+          - get
+        - apiGroups:
+          - apps
+          resources:
+          - deployments
+          - daemonsets
+          - replicasets
+          - statefulsets
+          verbs:
+          - '*'
+        - apiGroups:
+          - monitoring.coreos.com
+          resources:
+          - servicemonitors
+          verbs:
+          - get
+          - create
+        - apiGroups:
+          - ai.mlflow.org
+          resources:
+          - '*'
+          verbs:
+          - '*'
+        serviceAccountName: mlflow-tracking-operator
+    strategy: deployment
+  maturity: alpha
+  provider: {}
+  version: 0.0.1
