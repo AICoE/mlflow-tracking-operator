@@ -1,0 +1,4 @@
+packageName: mlflow
+channels:
+  - name: alpha
+    currentCSV: mlflow-tracking-operator:0.0.1
