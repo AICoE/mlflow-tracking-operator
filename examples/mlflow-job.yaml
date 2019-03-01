@@ -35,8 +35,6 @@ objects:
               value: "${MLFLOW_EXPERIMENT_ID}"
             - name:  MLFLOW_TRACKING_URI
               value: "${MLFLOW_TRACKING_URI}"
-            - name: MLFLOW_S3_ENDPOINT_URL
-              value: "${MLFLOW_S3_ENDPOINT_URL}"
         restartPolicy: Never
 
 parameters:
@@ -44,7 +42,6 @@ parameters:
   required: true
 - name: IMAGE_URI
   required: true
-- name: MLFLOW_S3_ENDPOINT_URL
 - name: SECRET_KEY
 - name: MLFLOW_TRACKING_URI
   required: true
