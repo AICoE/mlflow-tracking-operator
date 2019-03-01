@@ -160,7 +160,6 @@ func newServiceForMLFlow(cr *aiv1alpha1.TrackingServer) *corev1.Service  {
 			OwnerReferences: []metav1.OwnerReference{},
 		},
 		Spec: corev1.ServiceSpec{
-			Type:      "ClusterIP",
 			Selector: map[string]string{
 				"app": cr.Name,
 			},

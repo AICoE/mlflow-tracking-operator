@@ -59,7 +59,7 @@ spec:
 
 
   description: MLFlow Tracking Server for experiment tracking of machine learning jobs
-  displayName: OpenDatahub - Mlflow Tracking Operator
+  displayName: Mlflow Tracking Server
   keywords: ['mlflow', 'hyperparameter-tuning', 'machine-learning']
   maintainers:
     - name: Zak Hassan
@@ -106,7 +106,7 @@ spec:
                       fieldPath: metadata.name
                 - name: OPERATOR_NAME
                   value: mlflow-tracking-operator
-                image: quay.io/zmhassan/mlflow-tracking-operator
+                image: quay.io/zmhassan/mlflow-tracking-operator@sha256:817825f0da7499de0a15f3bbfe889eac8317f73d35881195a8ea2d4fb720d270
                 imagePullPolicy: Always
                 name: mlflow-tracking-operator
                 resources: {}
@@ -157,7 +157,7 @@ spec:
     strategy: deployment
   maturity: alpha
   provider:
-    name: Mlflow
+    name: AICoE
   labels:
     name: mlflow-tracking-operator
   selector:

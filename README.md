@@ -11,7 +11,7 @@ the experiment tracking feature provided by MLFlow. We have ported
 MLFlow to run on OpenShift and is now available for data scientists to
 utilize.
 
-![](./imgs/image19.png) 
+![](./imgs/mlflow-operator-olm.gif) 
 The goal is for experiment tracking is to
 allow our data scientists to test many parameters at scale using
 OpenShift or Kubernetes. You can then compare
